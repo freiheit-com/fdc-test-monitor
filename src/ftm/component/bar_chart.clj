@@ -3,22 +3,42 @@
 
 (def +chart-height+ 10)
 
-;TODO encode status in chart, < 0.3 -> red, 0.3 - 0.85 yellow, > 0.85 yellow
-; stale -> other color (coverage data older than x days)
+;TODO encode status in chart
+; stale -> gray (coverage data older than x days)
 
+;TODO Sort data by project-name (default sort)
 ;TODO compare old to current (30 days ago default)
-
 ;TODO output project-info -> :info <project-name> print info to info panel!
+;TODO print percentage number under bar
 
 (defn- legend [scr col row-start text]
-  (doseq [i (range 0 (count text))]
-    (s/put-string scr col (- row-start (- (count text) i)) (str (.charAt text i)))))
+  (let [cut-text (take +chart-height+ text)]
+    (doseq [i (range 0 (count cut-text))]
+      (s/put-string scr col (+ 1 (- row-start (- (count cut-text) i))) (str (.charAt text i))))))
 
-;TODO fragment bar elements (mod percentage 0.1)
+(defn- status-colour [percentage]
+  (cond (<= percentage 0.3) :red
+        (<= percentage 0.85) :yellow
+        :else :green))
+
+(defn- fragment [percentage]
+  (let [rst (mod percentage 0.1)]
+    (cond (<= rst 0.0001) " "
+          (<= rst 0.0125) "\u2581"
+          (<= rst 0.025) "\u2582"
+          (<= rst 0.0375) "\u2583"
+          (<= rst 0.05) "\u2584"
+          (<= rst 0.0625) "\u2585"
+          (<= rst 0.075) "\u2586"
+          (<= rst 0.0875) "\u2587"
+          :else "\u2588")))
+
 (defn- bar [scr col row-start percentage]
-  (let [full (int (/ percentage  0.1))]
-    (doseq [r (range (- (+ row-start 1) full) row-start)]
-      (s/put-string scr col r "\u2588"))))
+  (let [full (int (/ percentage  0.1))
+        style {:fg (status-colour percentage)}]
+    (doseq [r (range row-start (- (- row-start full) 1) -1)]
+      (s/put-string scr col r "\u2588" style))
+    (s/put-string scr col (- row-start full) (fragment percentage) style)))
 
 (defn- bar-with-legend [scr [start-col start-row] col project-data]
   (let [bottom-row (+ start-row +chart-height+)]

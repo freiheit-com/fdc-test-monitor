@@ -10,7 +10,8 @@
   (s/start scr)
   (s/move-cursor scr 0 5)
   (bar-chart scr [{:percentage 0.501 :project "test1"} {:percentage 0.77 :project "test2"}
-                  {:percentage 1 :project "test3"} {:percentage 0.23 :project "test4"}])
+                  {:percentage 1 :project "test3"} {:percentage 0.23 :project "test4"}
+                  {:percentage 0.37 :project "test5-with-very-long-name"}])
   (s/move-cursor scr 0 0)
 
   ;(s/put-string scr 10 10 "\u2581 \u2582 \u2583 \u2585 \u2586 \u2587 \u2589 \u258A \u258B  - \u2588 \u2584  - \u2518 \u256B \uD83D"
