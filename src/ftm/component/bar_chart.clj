@@ -1,17 +1,18 @@
 (ns ftm.component.bar-chart
-  (:require [lanterna.screen :as s]))
+  (:require [lanterna.screen :as s] [clojure.pprint :as pprint] [cheshire.core :as cheshire]))
 
 (def +chart-height+ 10)
 
 ;TODO encode status in chart
 ; stale -> gray (coverage data older than x days)
 
-;TODO Sort data by project-name (default sort)
 ;TODO compare old to current (30 days ago default)
 ;TODO output project-info -> :info <project-name> print info to info panel!
-;TODO print percentage number under bar
 
-(defn- legend [scr col row-start text]
+;TODO Use real data (config file for server, token mngmt)
+;TODO Repsonsive View, use free space as good as possible
+
+(defn- project-legend [scr col row-start text]
   (let [cut-text (take +chart-height+ text)]
     (doseq [i (range 0 (count cut-text))]
       (s/put-string scr col (+ 1 (- row-start (- (count cut-text) i))) (str (.charAt text i))))))
@@ -20,6 +21,9 @@
   (cond (<= percentage 0.3) :red
         (<= percentage 0.85) :yellow
         :else :green))
+
+(defn- percentage-legend [scr col row-start percentage]
+  (s/put-string scr col (+ 1 row-start) (pprint/cl-format nil "~,1f" (* 100 percentage)) {:fg (status-colour percentage)}))
 
 (defn- fragment [percentage]
   (let [rst (mod percentage 0.1)]
@@ -42,12 +46,14 @@
 
 (defn- bar-with-legend [scr [start-col start-row] col project-data]
   (let [bottom-row (+ start-row +chart-height+)]
-    (legend scr col bottom-row (:project project-data))
+    (project-legend scr col bottom-row (:project project-data))
     (bar scr (+ 1 col) bottom-row (:percentage project-data))
-    (+ col 4)))
+    (percentage-legend scr col bottom-row (:percentage project-data))
+    (+ col 5)))
 
-(defn bar-chart [scr data]
-  (let [raw-size (.getCursorPosition scr); TODO rewrite with clojure-lanterna 0.9.5 release
+(defn bar-chart [scr data-raw]
+  (let [data (sort-by :project data-raw)
+        raw-size (.getCursorPosition scr); TODO rewrite with clojure-lanterna 0.9.5 release
         col (.getColumn raw-size)
         row (.getRow raw-size)
         start-pos [col row]
