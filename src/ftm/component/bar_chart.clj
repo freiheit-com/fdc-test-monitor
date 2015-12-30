@@ -1,4 +1,5 @@
 (ns ftm.component.bar-chart
+  (:use ftm.common)
   (:require [lanterna.screen :as s] [clojure.pprint :as pprint] [cheshire.core :as cheshire]))
 
 (def +chart-height+ 10)
@@ -9,7 +10,6 @@
 ;TODO compare old to current (30 days ago default)
 ;TODO output project-info -> :info <project-name> print info to info panel!
 
-;TODO Use real data (config file for server, token mngmt)
 ;TODO Repsonsive View, use free space as good as possible
 
 (defn- project-legend [scr col row-start text]
@@ -53,9 +53,7 @@
 
 (defn bar-chart [scr data-raw]
   (let [data (sort-by :project data-raw)
-        raw-size (.getCursorPosition scr); TODO rewrite with clojure-lanterna 0.9.5 release
-        col (.getColumn raw-size)
-        row (.getRow raw-size)
-        start-pos [col row]
+        start-pos (get-cursor-position scr)
+        [col row] start-pos
         bottom-row (+ row +chart-height+)]
     (reduce (partial bar-with-legend scr start-pos) col data)))
