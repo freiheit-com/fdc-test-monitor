@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [clojure-lanterna "0.9.4"]
                  [clj-http "2.0.0"]
-                 [cheshire "5.5.0"]]
+                 [cheshire "5.5.0"]
+                 [org.clojure/math.numeric-tower "0.0.4"]]
   :aot :all
   :main ftm.core)

@@ -1,6 +1,7 @@
 (ns ftm.component.bar-chart
   (:use ftm.common)
-  (:require [lanterna.screen :as s] [clojure.pprint :as pprint] [cheshire.core :as cheshire]))
+  (:require [lanterna.screen :as s] [clojure.pprint :as pprint] [cheshire.core :as cheshire]
+            [clojure.math.numeric-tower :as math]))
 
 (def +chart-height+ 10)
 
@@ -11,6 +12,10 @@
 ;TODO output project-info -> :info <project-name> print info to info panel!
 
 ;TODO Repsonsive View, use free space as good as possible
+
+;TODO Warning, if terminal size too small to show all projects
+
+;TODO Terminal size is always reported as width 80 character -> Bug?
 
 (defn- project-legend [scr col row-start text]
   (let [cut-text (take +chart-height+ text)]
@@ -37,23 +42,34 @@
           (<= rst 0.0875) "\u2587"
           :else "\u2588")))
 
-(defn- bar [scr col row-start percentage]
+(defn- bar [scr col row-start bar-width percentage]
   (let [full (int (/ percentage  0.1))
         style {:fg (status-colour percentage)}]
-    (doseq [r (range row-start (- (- row-start full) 1) -1)]
-      (s/put-string scr col r "\u2588" style))
-    (s/put-string scr col (- row-start full) (fragment percentage) style)))
+    (doseq [col-offset (range 0 (+ 1 bar-width))]
+      (do
+        (doseq [r (range row-start (- (- row-start full) 1) -1)]
+          (s/put-string scr (+ col col-offset) r "\u2588" style))
+        (s/put-string scr (+ col col-offset) (- row-start full) (fragment percentage) style)))))
 
-(defn- bar-with-legend [scr [start-col start-row] col project-data]
+(defn- single-elem-width [bar-width]
+  (+ bar-width 3))
+
+;TODO Centre percentage-legend under bar
+(defn- bar-with-legend [scr [start-col start-row] bar-width col project-data]
   (let [bottom-row (+ start-row +chart-height+)]
     (project-legend scr col bottom-row (:project project-data))
-    (bar scr (+ 1 col) bottom-row (:percentage project-data))
+    (bar scr (+ 1 col) bottom-row bar-width (:percentage project-data))
     (percentage-legend scr col bottom-row (:percentage project-data))
-    (+ col 5)))
+    (+ col (single-elem-width bar-width))))
+
+(defn- bar-width [width]
+  (math/floor (- width 3)))
 
 (defn bar-chart [scr data-raw]
   (let [data (sort-by :project data-raw)
         start-pos (get-cursor-position scr)
         [col row] start-pos
-        bottom-row (+ row +chart-height+)]
-    (reduce (partial bar-with-legend scr start-pos) col data)))
+        bottom-row (+ row +chart-height+)
+        [width _] (s/get-size scr)
+        barw  (bar-width (/ width (count data)))]
+    (reduce (partial bar-with-legend scr start-pos barw) col data)))

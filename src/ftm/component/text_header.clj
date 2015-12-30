@@ -1,7 +1,7 @@
 (ns ftm.component.text-header
   (:use ftm.common)
   (:require [lanterna.screen :as s]))
-
+                                                                             
 ;TODO Centre
 (defn text-header [scr]
   (let [[col row] (get-cursor-position scr)]
