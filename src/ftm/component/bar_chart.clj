@@ -54,6 +54,9 @@
 (defn- single-elem-width [bar-width]
   (+ bar-width 3))
 
+(defn- bar-width [screen-width num-bars]
+  (math/floor (min (- (/ screen-width num-bars) 3) (/ screen-width 4))))
+
 ;TODO Centre percentage-legend under bar
 (defn- bar-with-legend [scr [start-col start-row] bar-width col project-data]
   (let [bottom-row (+ start-row +chart-height+)]
@@ -62,14 +65,11 @@
     (percentage-legend scr col bottom-row (:percentage project-data))
     (+ col (single-elem-width bar-width))))
 
-(defn- bar-width [width]
-  (math/floor (- width 3)))
-
 (defn bar-chart [scr data-raw]
   (let [data (sort-by :project data-raw)
         start-pos (get-cursor-position scr)
         [col row] start-pos
         bottom-row (+ row +chart-height+)
         [width _] (s/get-size scr)
-        barw  (bar-width (/ width (count data)))]
+        barw  (bar-width width (count data))]
     (reduce (partial bar-with-legend scr start-pos barw) col data)))
