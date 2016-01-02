@@ -4,8 +4,16 @@
             [lanterna.terminal :as t]
             [ftm.config :as config]
             [clj-http.client :as client]
-            [cheshire.core :as cheshire])
+            [cheshire.core :as cheshire]
+            [clojure.core.async :as go])
   (:gen-class))
+
+;TODO Add refresh date to bottom bar
+
+;TODO output project-info -> :info <project-name> print info to info panel!
+;TODO test-change-ticker (like a stock ticker with coverage data changes)
+
+(def +refresh-interval+ (* 60 60 1000)) ;1 hour
 
 (defn- load-projects []
   (let [projects (client/get (str (config/statistic-server-url) "/meta/projects")
@@ -27,10 +35,8 @@
 (defn- load-data []
   (-> (load-projects) (load-coverage)))
 
-(defn -main [& args]
-  (def scr (s/get-screen))
-
-  (s/start scr)
+(defn- refresh-screen [scr]
+  (s/clear scr)
 
   (s/move-cursor scr 0 0)
   (text-header scr)
@@ -40,7 +46,22 @@
 
   (s/move-cursor scr 0 0)
 
-  (s/redraw scr)
-  (s/get-key-blocking scr)
+  (s/redraw scr))
 
+(defn- read-input [scr]
+  ;a stub atm, read any input and throw it away
+  (s/get-key-blocking scr)
+  (recur scr))
+
+(defn -main [& args]
+  (def scr (s/get-screen))
+
+  (s/start scr)
+
+  (go/go-loop []
+    (do (refresh-screen scr)
+        (Thread/sleep +refresh-interval+)
+        (recur)))
+
+  (read-input scr)
   (s/stop scr))

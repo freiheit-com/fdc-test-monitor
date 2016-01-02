@@ -7,6 +7,7 @@
                  [clojure-lanterna "3.0.0-beta1"]
                  [clj-http "2.0.0"]
                  [cheshire "5.5.0"]
-                 [org.clojure/math.numeric-tower "0.0.4"]]
+                 [org.clojure/math.numeric-tower "0.0.4"]
+                 [org.clojure/core.async "0.2.374"]]
   :aot :all
   :main ftm.core)

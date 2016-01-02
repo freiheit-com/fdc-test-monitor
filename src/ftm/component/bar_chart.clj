@@ -7,15 +7,10 @@
 
 ;TODO encode status in chart
 ; stale -> gray (coverage data older than x days)
+;TODO compare old to current (30 days ago default
 
-;TODO compare old to current (30 days ago default)
-;TODO output project-info -> :info <project-name> print info to info panel!
-
-;TODO Repsonsive View, use free space as good as possible
-
+;TODO Repsonsive View (height), use height of terminal better
 ;TODO Warning, if terminal size too small to show all projects
-
-;TODO Terminal size is always reported as width 80 character -> Bug?
 
 (defn- project-legend [scr col row-start text]
   (let [cut-text (take +chart-height+ text)]
