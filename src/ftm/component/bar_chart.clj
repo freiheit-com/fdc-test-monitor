@@ -54,10 +54,11 @@
 
 ;TODO Centre percentage-legend under bar
 (defn- bar-with-legend [scr [start-col start-row] bar-width col project-data]
-  (let [bottom-row (+ start-row +chart-height+)]
+  (let [bottom-row (+ start-row +chart-height+)
+        percentage (if (:percentage project-data) (:percentage project-data) 0.0)]
     (project-legend scr col bottom-row (:project project-data))
-    (bar scr (+ 1 col) bottom-row bar-width (:percentage project-data))
-    (percentage-legend scr col bottom-row (:percentage project-data))
+    (bar scr (+ 1 col) bottom-row bar-width percentage)
+    (percentage-legend scr col bottom-row percentage)
     (+ col (single-elem-width bar-width))))
 
 (defn bar-chart [scr data-raw]

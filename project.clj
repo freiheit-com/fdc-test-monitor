@@ -1,4 +1,4 @@
-(defproject fdc-test-monitor "0.1.0"
+(defproject fdc-test-monitor "0.1.1"
   :description "test monitoring ui"
   :url "https://github.com/freiheit-com/fdc-test-monitor"
   :license {:name "GPLv3"
